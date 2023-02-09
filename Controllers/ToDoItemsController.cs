@@ -104,7 +104,7 @@ public class ToDoItemsController : ControllerBase
     {
         Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
 
-        ValidateSaveToDoItem validator = new ValidateSaveToDoItem(hash);
+        ValidateSaveToDoItem validator = new ValidateSaveToDoItem(hash, _toDoItemService);
         validator.Execute();
 
         if (validator.HasErrors())
@@ -118,30 +118,6 @@ public class ToDoItemsController : ControllerBase
             _toDoItemService.Save(builder.Item);
             Dictionary<string, object> message = new Dictionary<string, object>();
             message.Add("message", "Item created");
-
-            return Ok(message);
-        }
-    }
-
-    [HttpPut("")]
-    public IActionResult Update([FromBody] object payloadObj)
-    {
-        Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
-
-        ValidateSaveToDoItem validator = new ValidateSaveToDoItem(hash);
-        validator.Execute();
-
-        if (validator.HasErrors())
-        {
-            return UnprocessableEntity(validator.Errors);
-        }
-        else {
-            builder = new BuildToDoItemFromPayload(hash, _toDoItemService);
-            builder.Run();
-
-            _toDoItemService.Save(builder.Item);
-            Dictionary<string, object> message = new Dictionary<string, object>();
-            message.Add("message", "Item updated");
 
             return Ok(message);
         }

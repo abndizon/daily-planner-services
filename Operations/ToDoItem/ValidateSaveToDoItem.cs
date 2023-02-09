@@ -1,14 +1,19 @@
 namespace DailyPlannerServices.Operations;
 
+using DailyPlannerServices.Interfaces;
+using DailyPlannerServices.Models;
+
 public class ValidateSaveToDoItem
 {
+    private readonly IToDoItemService _toDoItemService;
     private Dictionary<string, object> payload;
 
     public Dictionary<string, List<string>> Errors { get; private set; }
 
-    public ValidateSaveToDoItem(Dictionary<string, object> payload)
+    public ValidateSaveToDoItem(Dictionary<string, object> payload, IToDoItemService toDoItemService)
     {
         this.payload = payload;
+        this._toDoItemService = toDoItemService;
 
         this.Errors = new Dictionary<string, List<string>>();
         Errors.Add("name", new List<string>());
@@ -114,8 +119,36 @@ public class ValidateSaveToDoItem
 
         if (payload.ContainsKey("startTime") && payload.ContainsKey("endTime") 
             && Errors["startTime"].Count == 0 && Errors["endTime"].Count == 0) {
+
+            // Check if time is valid
             if (endTime < startTime) {
                 Errors["endTime"].Add("End Time must be greater than start time");
+            }
+
+            // Check if time is overlapping with other saved entries
+            var itemsForTheDay = _toDoItemService.GetItemsByDate(payload["date"].ToString());
+            string toDoTimeConflict = "";
+
+            if (payload.ContainsKey("id"))
+            {
+                var editingItem = _toDoItemService.GetItemById(Convert.ToInt32(payload["id"].ToString()));
+                itemsForTheDay.Remove(editingItem);
+            }
+
+            bool overlap = itemsForTheDay.Any(x => {
+                DateTime tempStart = DateTime.ParseExact(x.StartTime, "HH:mm", null);
+                DateTime tempEnd = DateTime.ParseExact(x.EndTime, "HH:mm", null);
+                
+                if (tempStart < endTime && startTime < tempEnd) {
+                    toDoTimeConflict = x.Name;
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (overlap) {
+                Errors["startTime"].Add($"Time entered is conflicting with another to do: {toDoTimeConflict}");
             }
         }
     }
