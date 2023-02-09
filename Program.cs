@@ -31,6 +31,7 @@ namespace DailyPlannerServices
             // Add services
             builder.Services.AddScoped<IToDoItemService, ToDoItemsMSSQLService>();
             builder.Services.AddScoped<ICategoryService, CategoriesMSSQLService>();
+            builder.Services.AddScoped<IStatusService, StatusesMSSQLService>();
             builder.Services.AddScoped<IUserService, UsersMSSQLService>();
 
             WebApplication app = builder.Build();

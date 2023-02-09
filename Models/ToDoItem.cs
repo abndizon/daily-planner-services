@@ -8,15 +8,17 @@ namespace DailyPlannerServices.Models
         public DateTime Date { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
+        public int StatusId { get; set; }
         public int UserId { get; set; }
         public Category Category { get; set; }
         public User User { get; set; }
+        public Status Status { get; set; }
 
         public ToDoItem()
         {
         }
 
-        public ToDoItem(int id, string name, int categoryId, DateTime date, string starTime, string endTime, int userId)
+        public ToDoItem(int id, string name, int categoryId, DateTime date, string starTime, string endTime, int userId, int statusId)
         {
             this.Id = id;
             this.Name = name;
@@ -25,6 +27,7 @@ namespace DailyPlannerServices.Models
             this.StartTime = starTime;
             this.EndTime = endTime;
             this.UserId = userId;
+            this.StatusId = statusId;
         }
     }
 }

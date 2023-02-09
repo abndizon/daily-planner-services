@@ -12,10 +12,10 @@ public class ValidateSaveToDoItem
 
         this.Errors = new Dictionary<string, List<string>>();
         Errors.Add("name", new List<string>());
-        Errors.Add("category_id", new List<string>());
+        Errors.Add("categoryId", new List<string>());
         Errors.Add("date", new List<string>());
-        Errors.Add("start_time", new List<string>());
-        Errors.Add("end_time", new List<string>());
+        Errors.Add("startTime", new List<string>());
+        Errors.Add("endTime", new List<string>());
     }
 
     public bool HasErrors()
@@ -37,24 +37,24 @@ public class ValidateSaveToDoItem
         }
 
         // Category ID validation
-        if (!payload.ContainsKey("category_id"))
+        if (!payload.ContainsKey("categoryId"))
         {
-            Errors["category_id"].Add("category id is required");
+            Errors["categoryId"].Add("category id is required");
         }
         else
         {
             try
             {
-                int categoryId = int.Parse(payload["category_id"].ToString());
+                int categoryId = int.Parse(payload["categoryId"].ToString());
 
                 if (categoryId <= 0)
                 {
-                    Errors["category_id"].Add("category_id should be greater than 0");
+                    Errors["categoryId"].Add("categoryId should be greater than 0");
                 }
             }
             catch (Exception ex)
             {
-                Errors["category_id"].Add(ex.Message);
+                Errors["categoryId"].Add(ex.Message);
             }
         }
 
@@ -80,42 +80,42 @@ public class ValidateSaveToDoItem
         DateTime startTime = new DateTime();
         DateTime endTime = new DateTime();
 
-        if (!payload.ContainsKey("start_time"))
+        if (!payload.ContainsKey("startTime"))
         {
-            Errors["start_time"].Add("start time is required");
+            Errors["startTime"].Add("start time is required");
         }
         else
         {
             try
             {
-                startTime = DateTime.ParseExact(payload["start_time"].ToString(), "HH:mm", null);
+                startTime = DateTime.ParseExact(payload["startTime"].ToString(), "HH:mm", null);
             }
             catch (Exception ex)
             {
-                Errors["start_time"].Add(ex.Message);
+                Errors["startTime"].Add(ex.Message);
             }
         }
 
-        if (!payload.ContainsKey("end_time"))
+        if (!payload.ContainsKey("endTime"))
         {
-            Errors["end_time"].Add("end time is required");
+            Errors["endTime"].Add("end time is required");
         }
         else
         {
             try
             {
-                endTime = DateTime.ParseExact(payload["end_time"].ToString(), "HH:mm", null);
+                endTime = DateTime.ParseExact(payload["endTime"].ToString(), "HH:mm", null);
             }
             catch (Exception ex)
             {
-                Errors["end_time"].Add(ex.Message);
+                Errors["endTime"].Add(ex.Message);
             }
         }
 
-        if (payload.ContainsKey("start_time") && payload.ContainsKey("end_time") 
-            && Errors["start_time"].Count == 0 && Errors["end_time"].Count == 0) {
+        if (payload.ContainsKey("startTime") && payload.ContainsKey("endTime") 
+            && Errors["startTime"].Count == 0 && Errors["endTime"].Count == 0) {
             if (endTime < startTime) {
-                Errors["end_time"].Add("End Time must be greater than start time");
+                Errors["endTime"].Add("End Time must be greater than start time");
             }
         }
     }

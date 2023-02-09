@@ -4,20 +4,20 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using DailyPlannerServices.Operations;
 using DailyPlannerServices.Interfaces;
-using DailyPlannerServices.Models;
 using System.Text.Json.Serialization;
+using DailyPlannerServices.Models;
 
 [ApiController]
-[Route("users")]
-public class UsersController : ControllerBase
+[Route("statuses")]
+public class StatusesController : ControllerBase
 {
-    private readonly IUserService _userService;
-    BuildUserFromPayload builder;
+    private readonly IStatusService _statusService;
+    BuildStatusFromPayload builder;
     JsonSerializerOptions seralizerOptions;
 
-    public UsersController(IUserService userService)
+    public StatusesController(IStatusService statusService)
     {
-        _userService = userService;
+        _statusService = statusService;
 
         seralizerOptions = new JsonSerializerOptions
         {
@@ -30,8 +30,8 @@ public class UsersController : ControllerBase
     [HttpGet("")]
     public IActionResult Index()
     {
-        var users = _userService.GetAll();
-        var payload = JsonSerializer.Serialize(users, seralizerOptions);
+        var categories = _statusService.GetAll();
+        var payload = JsonSerializer.Serialize(categories, seralizerOptions);
 
         return Ok(payload);
     }
@@ -39,11 +39,11 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult Show(int id)
     {
-        var user = _userService.GetUserById(id);
+        var status = _statusService.GetStatusById(id);
 
-        if (user != null)
+        if (status != null)
         {
-            var payload = JsonSerializer.Serialize(user, seralizerOptions);
+            var payload = JsonSerializer.Serialize(status, seralizerOptions);
             return Ok(payload);
         }
         else
@@ -57,7 +57,7 @@ public class UsersController : ControllerBase
     {
         Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
 
-        ValidateSaveUser validator = new ValidateSaveUser(hash);
+        ValidateSaveStatus validator = new ValidateSaveStatus(hash);
         validator.Execute();
 
         if (validator.HasErrors())
@@ -65,12 +65,12 @@ public class UsersController : ControllerBase
             return UnprocessableEntity(validator.Errors);
         }
         else {
-            builder = new BuildUserFromPayload(hash);
+            builder = new BuildStatusFromPayload(hash, _statusService);
             builder.Run();
 
-            _userService.Save(builder.User);
+            _statusService.Save(builder.Status);
             Dictionary<string, object> message = new Dictionary<string, object>();
-            message.Add("message", "User created");
+            message.Add("message", "Status created");
 
             return Ok(message);
         }
@@ -81,22 +81,22 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var userToDelete = _userService.GetUserById(id);
+            var statusToDelete = _statusService.GetStatusById(id);
 
-            if (userToDelete == null)
+            if (statusToDelete == null)
             {
-                return NotFound($"User with id {id} not found");
+                return NotFound($"Status with id {id} not found");
             }
 
             Dictionary<string, object> message = new Dictionary<string, object>();
             message.Add("message", "Ok");
 
-            _userService.Delete(id);
+            _statusService.Delete(id);
             return Ok(message);
         }
         catch (Exception)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting user");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting status");
         }
     }
 }

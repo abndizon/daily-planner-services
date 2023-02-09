@@ -15,7 +15,7 @@ public class CategoriesController : ControllerBase
     BuildCategoryFromPayload builder;
     JsonSerializerOptions seralizerOptions;
 
-    public CategoriesController(IToDoItemService toDoItemService, ICategoryService categoryService)
+    public CategoriesController(ICategoryService categoryService)
     {
         _categoryService = categoryService;
 
@@ -50,15 +50,6 @@ public class CategoriesController : ControllerBase
         {
             return NotFound();
         }
-    }
-
-    [HttpGet("{id}/todo_items")]
-     public IActionResult ToDoItems(int id)
-    {
-        List<ToDoItem> toDoItems = _categoryService.GetToDoItemsByCategory(id);
-        var payload = JsonSerializer.Serialize(toDoItems, seralizerOptions);
-
-        return Ok(payload);
     }
 
     [HttpPost("")]

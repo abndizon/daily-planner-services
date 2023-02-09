@@ -11,14 +11,12 @@ using System.Text.Json.Serialization;
 public class ToDoItemsController : ControllerBase
 {
     private readonly IToDoItemService _toDoItemService;
-    private readonly ICategoryService _categoryService;
     BuildToDoItemFromPayload builder;
     JsonSerializerOptions seralizerOptions;
 
-    public ToDoItemsController(IToDoItemService toDoItemService, ICategoryService categoryService)
+    public ToDoItemsController(IToDoItemService toDoItemService)
     {
         _toDoItemService = toDoItemService;
-        _categoryService = categoryService;
 
         seralizerOptions = new JsonSerializerOptions
         {
@@ -32,7 +30,10 @@ public class ToDoItemsController : ControllerBase
     public IActionResult Index()
     {
         var items = _toDoItemService.GetAll();
-        var payload = JsonSerializer.Serialize(items, seralizerOptions);
+        var sorted = items.OrderBy(x => x.StartTime)
+                                    .ThenBy(x => x.Name)
+                                    .ToList();
+        var payload = JsonSerializer.Serialize(sorted, seralizerOptions);
 
         return Ok(payload);
     }
@@ -51,6 +52,51 @@ public class ToDoItemsController : ControllerBase
         {
             return NotFound();
         }
+    }
+
+    [HttpGet("category/{id}/date/{date}")]
+     public IActionResult FilterCategoryAndDate(int id, string date)
+    {
+        var toDoItems = _toDoItemService.GetItemsByCategoryAndDate(id, date);
+        var sorted = toDoItems.OrderBy(x => x.StartTime)
+                                    .ThenBy(x => x.Name)
+                                    .ToList();
+        var payload = JsonSerializer.Serialize(sorted, seralizerOptions);
+
+        return Ok(payload);
+    }
+
+    [HttpGet("category/{id}")]
+     public IActionResult FilterByCategory(int id)
+    {
+        var toDoItems = _toDoItemService.GetItemsByCategory(id);
+        var sorted = toDoItems.OrderBy(x => x.StartTime)
+                                    .ThenBy(x => x.Name)
+                                    .ToList();
+        var payload = JsonSerializer.Serialize(sorted, seralizerOptions);
+
+        return Ok(payload);
+    }
+
+    [HttpGet("date/{date}")]
+     public IActionResult FilterByDate(string date)
+    {
+        var toDoItems = _toDoItemService.GetItemsByDate(date);
+        var sorted = toDoItems.OrderBy(x => x.StartTime)
+                                    .ThenBy(x => x.Name)
+                                    .ToList();
+        var payload = JsonSerializer.Serialize(sorted, seralizerOptions);
+
+        return Ok(payload);
+    }
+
+    [HttpGet("user/{id}")]
+    public IActionResult IndexByUser(int id)
+    {
+        var toDoItems = _toDoItemService.GetItemsByUser(id);
+        var payload = JsonSerializer.Serialize(toDoItems, seralizerOptions);
+
+        return Ok(payload);
     }
 
     [HttpPost("")]
@@ -72,6 +118,30 @@ public class ToDoItemsController : ControllerBase
             _toDoItemService.Save(builder.Item);
             Dictionary<string, object> message = new Dictionary<string, object>();
             message.Add("message", "Item created");
+
+            return Ok(message);
+        }
+    }
+
+    [HttpPut("")]
+    public IActionResult Update([FromBody] object payloadObj)
+    {
+        Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
+
+        ValidateSaveToDoItem validator = new ValidateSaveToDoItem(hash);
+        validator.Execute();
+
+        if (validator.HasErrors())
+        {
+            return UnprocessableEntity(validator.Errors);
+        }
+        else {
+            builder = new BuildToDoItemFromPayload(hash, _toDoItemService);
+            builder.Run();
+
+            _toDoItemService.Save(builder.Item);
+            Dictionary<string, object> message = new Dictionary<string, object>();
+            message.Add("message", "Item updated");
 
             return Ok(message);
         }

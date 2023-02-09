@@ -6,7 +6,6 @@ namespace DailyPlannerServices.Interfaces
     {
         List<Category> GetAll();
         Category GetCategoryById(int id);
-        List<ToDoItem> GetToDoItemsByCategory(int id);
         Category Save(Category category);
         void Delete(int id);
     }
