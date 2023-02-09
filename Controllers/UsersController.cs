@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using DailyPlannerServices.Operations;
 using DailyPlannerServices.Interfaces;
-using DailyPlannerServices.Models;
 using System.Text.Json.Serialization;
 
 [ApiController]
@@ -30,49 +29,71 @@ public class UsersController : ControllerBase
     [HttpGet("")]
     public IActionResult Index()
     {
-        var users = _userService.GetAll();
-        var payload = JsonSerializer.Serialize(users, seralizerOptions);
+        try
+        {
+            var users = _userService.GetAll();
+            var payload = JsonSerializer.Serialize(users, seralizerOptions);
 
-        return Ok(payload);
+            return Ok(payload);
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error getting users");
+        }
     }
 
     [HttpGet("{id}")]
     public IActionResult Show(int id)
     {
-        var user = _userService.GetUserById(id);
+        try
+        {
+            var user = _userService.GetUserById(id);
 
-        if (user != null)
-        {
-            var payload = JsonSerializer.Serialize(user, seralizerOptions);
-            return Ok(payload);
+            if (user != null)
+            {
+                var payload = JsonSerializer.Serialize(user, seralizerOptions);
+                return Ok(payload);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
-        else
+        catch (Exception)
         {
-            return NotFound();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error getting users");
         }
     }
 
     [HttpPost("")]
     public IActionResult Save([FromBody] object payloadObj)
     {
-        Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
-
-        ValidateSaveUser validator = new ValidateSaveUser(hash);
-        validator.Execute();
-
-        if (validator.HasErrors())
+        try
         {
-            return UnprocessableEntity(validator.Errors);
+            Dictionary<string, object> hash = JsonSerializer.Deserialize<Dictionary<string, object>>(payloadObj.ToString());
+
+            ValidateSaveUser validator = new ValidateSaveUser(hash);
+            validator.Execute();
+
+            if (validator.HasErrors())
+            {
+                return UnprocessableEntity(validator.Errors);
+            }
+            else
+            {
+                builder = new BuildUserFromPayload(hash);
+                builder.Run();
+
+                _userService.Save(builder.User);
+                Dictionary<string, object> message = new Dictionary<string, object>();
+                message.Add("message", "User created");
+
+                return Ok(message);
+            }
         }
-        else {
-            builder = new BuildUserFromPayload(hash);
-            builder.Run();
-
-            _userService.Save(builder.User);
-            Dictionary<string, object> message = new Dictionary<string, object>();
-            message.Add("message", "User created");
-
-            return Ok(message);
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error saving user");
         }
     }
 

@@ -1,22 +1,20 @@
 namespace DailyPlannerServices.Operations;
 
 using DailyPlannerServices.Models;
-using DailyPlannerServices.Interfaces;
 
 public class BuildToDoItemFromPayload
 {
-    private readonly IToDoItemService _toDoItemService;
     private Dictionary<string, object> data;
     public ToDoItem Item { get; private set; }
 
-    public BuildToDoItemFromPayload(Dictionary<string, object> data, IToDoItemService toDoItemService)
+    public BuildToDoItemFromPayload(Dictionary<string, object> data)
     {
-        _toDoItemService = toDoItemService;
         this.data = data;
     }
 
     public void Run()
     {
+        // Assign id
         int id = 0;
         if (data.ContainsKey("id"))
         {
@@ -28,11 +26,15 @@ public class BuildToDoItemFromPayload
         DateTime date = DateTime.ParseExact(data["date"].ToString(), "yyyy-MM-dd", null);
         string starTime = data["startTime"].ToString();
         string endTime = data["endTime"].ToString();
+
+        // Assign user id, Default: 1
         int userId = 1;
         if (data.ContainsKey("userId"))
         {
             userId = Convert.ToInt32(data["userId"].ToString());
         }
+
+        // Assign status id, Default: 1
         int statusId = 1;
         if (data.ContainsKey("statusId"))
         {
@@ -40,6 +42,5 @@ public class BuildToDoItemFromPayload
         }
 
         Item = new ToDoItem(id, name, categoryId, date, starTime, endTime, userId, statusId);
-        Console.WriteLine("Debug! " + Item.StatusId);
     }
 }

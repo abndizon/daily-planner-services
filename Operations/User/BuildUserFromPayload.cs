@@ -1,7 +1,6 @@
 namespace DailyPlannerServices.Operations;
 
 using DailyPlannerServices.Models;
-using DailyPlannerServices.Interfaces;
 
 public class BuildUserFromPayload {
     private Dictionary<string, object> data;
@@ -14,6 +13,7 @@ public class BuildUserFromPayload {
 
     public void Run()
     {
+        // Assign id
         int id = 0;
         if(data.ContainsKey("id"))
         {

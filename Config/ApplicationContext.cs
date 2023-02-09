@@ -5,9 +5,6 @@ namespace DailyPlannerServices.Config
 {
     public class ApplicationContext
     {
-        private List<ToDoItem> itemLists;
-        private List<User> userLists;
-
         private static ApplicationContext instance = null;
 
         public static ApplicationContext Instance
@@ -23,10 +20,7 @@ namespace DailyPlannerServices.Config
         }
 
         public ApplicationContext()
-        {
-            this.itemLists = new List<ToDoItem>();
-            this.userLists = new List<User>();
-        }
+        {}
 
         public String GetConnectionString()
         {
@@ -42,17 +36,5 @@ namespace DailyPlannerServices.Config
 
             return connectionString;
         }
-
-        public List<ToDoItem> GetItems()
-        {
-            return this.itemLists;
-        }
-
-        public List<User> GetUsers()
-        {
-            return this.userLists;
-        }
-
-
     }
 }

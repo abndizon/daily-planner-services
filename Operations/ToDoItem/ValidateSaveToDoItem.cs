@@ -1,7 +1,6 @@
 namespace DailyPlannerServices.Operations;
 
 using DailyPlannerServices.Interfaces;
-using DailyPlannerServices.Models;
 
 public class ValidateSaveToDoItem
 {
@@ -73,7 +72,6 @@ public class ValidateSaveToDoItem
             try
             {
                 DateTime date = DateTime.ParseExact(payload["date"].ToString(), "yyyy-MM-dd", null);
-
             }
             catch (Exception ex)
             {
@@ -120,21 +118,23 @@ public class ValidateSaveToDoItem
         if (payload.ContainsKey("startTime") && payload.ContainsKey("endTime") 
             && Errors["startTime"].Count == 0 && Errors["endTime"].Count == 0) {
 
-            // Check if time is valid
+            // Check if end time is valid
             if (endTime < startTime) {
                 Errors["endTime"].Add("End Time must be greater than start time");
             }
 
-            // Check if time is overlapping with other saved entries
             var itemsForTheDay = _toDoItemService.GetItemsByDate(payload["date"].ToString());
             string toDoTimeConflict = "";
 
+            // Check if item is for update
             if (payload.ContainsKey("id"))
             {
+                // Remove current item in list so that it would not be compared with itself
                 var editingItem = _toDoItemService.GetItemById(Convert.ToInt32(payload["id"].ToString()));
                 itemsForTheDay.Remove(editingItem);
             }
 
+            // Check if time is overlapping with other saved entries
             bool overlap = itemsForTheDay.Any(x => {
                 DateTime tempStart = DateTime.ParseExact(x.StartTime, "HH:mm", null);
                 DateTime tempEnd = DateTime.ParseExact(x.EndTime, "HH:mm", null);

@@ -26,7 +26,7 @@ public class ValidateSaveCategory
 
     public void Execute()
     {
-        // Name validation
+        // Category Name validation
         if (!payload.ContainsKey("name"))
         {
             Errors["name"].Add("name is required");

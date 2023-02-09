@@ -14,9 +14,7 @@ namespace DailyPlannerServices.Models
         public User User { get; set; }
         public Status Status { get; set; }
 
-        public ToDoItem()
-        {
-        }
+        public ToDoItem() {}
 
         public ToDoItem(int id, string name, int categoryId, DateTime date, string starTime, string endTime, int userId, int statusId)
         {

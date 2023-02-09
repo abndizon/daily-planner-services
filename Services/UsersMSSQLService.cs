@@ -32,7 +32,10 @@ public class UsersMSSQLService : IUserService
         }
         else
         {
-            _dataContext.Update(user);
+            User temp = GetUserById(user.Id);
+            temp.FirstName = user.FirstName;
+            temp.LastName = user.LastName;
+            temp.EmailAddress = user.EmailAddress;
         }
         
         _dataContext.SaveChanges();
